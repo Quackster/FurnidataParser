@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Xml;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FurnidataParser;
 
@@ -22,12 +20,29 @@ public class FurnidataClient
             "AppleWebKit/537.36 (KHTML, like Gecko) " +
             "Chrome/120.0.0.0 Safari/537.36");
 
-        var rawResponse = await _httpClient.GetStringAsync(url, cancellationToken);
+        var data = await _httpClient.GetStringAsync(url, cancellationToken);
 
+        if (string.IsNullOrWhiteSpace(data))
+            return new List<FurniItem>();
+
+        if (IsXmlFileAsync(data))
+        {
+            // Looks like XML
+            return ParseXml(data);
+        }
+        else
+        {
+            // Assume chunked pseudo-JSON
+            return ParseChunkedJson(data);
+        }
+    }
+
+    private List<FurniItem> ParseChunkedJson(string data)
+    {
         var items = new List<FurniItem>();
 
         // Find all chunks like [["..."],["..."]]
-        var chunkMatches = Regex.Matches(rawResponse, @"\[\[.*?\]\]", RegexOptions.Singleline);
+        var chunkMatches = Regex.Matches(data, @"\[\[.*?\]\]", RegexOptions.Singleline);
 
         foreach (Match chunkMatch in chunkMatches)
         {
@@ -79,6 +94,56 @@ public class FurnidataClient
         return items;
     }
 
+    private List<FurniItem> ParseXml(string xml)
+    {
+        var items = new List<FurniItem>();
+
+        var doc = new System.Xml.XmlDocument();
+        doc.LoadXml(xml);
+
+        var furnitypes = doc.SelectNodes("//furnitype");
+        if (furnitypes == null) return items;
+
+        foreach (System.Xml.XmlNode node in furnitypes)
+        {
+            var item = new FurniItem
+            {
+                Id = int.TryParse(node.Attributes?["id"]?.Value, out var id) ? id : 0,
+                ClassName = node.Attributes?["classname"]?.Value ?? "",
+                Revision = int.TryParse(node.SelectSingleNode("revision")?.InnerText, out var rev) ? rev : 0,
+                Category = node.SelectSingleNode("category")?.InnerText ?? "",
+                XDim = int.TryParse(node.SelectSingleNode("xdim")?.InnerText, out var xdim) ? xdim : 0,
+                YDim = int.TryParse(node.SelectSingleNode("ydim")?.InnerText, out var ydim) ? ydim : 0,
+                PartColors = string.Join(",",
+                    node.SelectNodes("partcolors/color")?
+                        .Cast<System.Xml.XmlNode>()
+                        .Select(c => c.InnerText) ?? Array.Empty<string>()),
+                Name = node.SelectSingleNode("name")?.InnerText ?? "",
+                Description = node.SelectSingleNode("description")?.InnerText ?? "",
+                AdUrl = node.SelectSingleNode("adurl")?.InnerText ?? "",
+                OfferId = int.TryParse(node.SelectSingleNode("offerid")?.InnerText, out var offerid) ? offerid : 0,
+                Buyout = IsTrue(node.SelectSingleNode("buyout")?.InnerText),
+                RentOfferId = int.TryParse(node.SelectSingleNode("rentofferid")?.InnerText, out var rentofferid) ? rentofferid : 0,
+                RentBuyout = int.TryParse(node.SelectSingleNode("rentbuyout")?.InnerText, out var rentbuyout) ? rentbuyout : 0,
+                BC = IsTrue(node.SelectSingleNode("bc")?.InnerText),
+                ExcludedDynamic = IsTrue(node.SelectSingleNode("excludeddynamic")?.InnerText),
+                BCOfferId = int.TryParse(node.SelectSingleNode("bcofferid")?.InnerText, out var bcofferid) ? bcofferid : 0,
+                CustomParams = node.SelectSingleNode("customparams")?.InnerText ?? "",
+                SpecialType = int.TryParse(node.SelectSingleNode("specialtype")?.InnerText, out var specialtype) ? specialtype : 0,
+                CanStandOn = IsTrue(node.SelectSingleNode("canstandon")?.InnerText),
+                CanSitOn = IsTrue(node.SelectSingleNode("cansiton")?.InnerText),
+                CanLayOn = IsTrue(node.SelectSingleNode("canlayon")?.InnerText),
+                FurniLine = node.SelectSingleNode("furniline")?.InnerText ?? "",
+                Environment = node.SelectSingleNode("environment")?.InnerText ?? "",
+                Rare = IsTrue(node.SelectSingleNode("rare")?.InnerText)
+            };
+
+            items.Add(item);
+        }
+
+        return items;
+    }
+
     private static List<string> SplitFields(string item)
     {
         var fields = new List<string>();
@@ -93,6 +158,27 @@ public class FurnidataClient
         if (index < fields.Count)
             return fields[index] ?? "";
         return "";
+    }
+
+    private static bool IsXmlFileAsync(string fileContents)
+    {
+        try
+        {
+            using var reader = XmlReader.Create(new StringReader(fileContents), new XmlReaderSettings
+            {
+                ConformanceLevel = ConformanceLevel.Document,
+                IgnoreComments = true,
+                IgnoreWhitespace = true,
+                DtdProcessing = DtdProcessing.Ignore
+            });
+
+            while (reader.Read()) { }
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
     private static bool IsTrue(string value)
