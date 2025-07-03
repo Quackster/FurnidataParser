@@ -22,10 +22,10 @@ public class FurnidataClient
 
         var data = await _httpClient.GetStringAsync(url, cancellationToken);
 
-        return await ParseFurnidataAsync(data);
+        return await ParseFurnidataAsync(data, cancellationToken);
     }
 
-    private async Task<List<FurniItem>> ParseFurnidataAsync(string data)
+    private async Task<List<FurniItem>> ParseFurnidataAsync(string data, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(data))
             return new List<FurniItem>();
@@ -174,13 +174,14 @@ public class FurnidataClient
                 ConformanceLevel = ConformanceLevel.Document,
                 IgnoreComments = true,
                 IgnoreWhitespace = true,
+                Async = true,
                 DtdProcessing = DtdProcessing.Ignore
             });
 
             while (await reader.ReadAsync()) { }
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             return false;
         }
