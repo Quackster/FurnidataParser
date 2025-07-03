@@ -14,7 +14,7 @@ A lightweight .NET library for downloading and parsing Habbo furnidata.
 
 ## Usage
 
-Fetch from Habbo’s chunked JSON endpoint
+Fetch from Habbo’s chunked JSON endpoint.
 
 ```csharp
 using FurnidataParser;
@@ -27,7 +27,7 @@ var itemsFromJson = await client.FetchFurnidataAsync(
 Console.WriteLine($"Fetched {itemsFromJson.Count} items from chunked JSON endpoint.");
 ```
 
-Fetch from Habbo’s XML endpoint
+Fetch from Habbo’s XML endpoint.
 
 ```csharp
 using FurnidataParser;
