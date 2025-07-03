@@ -22,10 +22,15 @@ public class FurnidataClient
 
         var data = await _httpClient.GetStringAsync(url, cancellationToken);
 
+        return await ParseFurnidataAsync(data);
+    }
+
+    private async Task<List<FurniItem>> ParseFurnidataAsync(string data)
+    {
         if (string.IsNullOrWhiteSpace(data))
             return new List<FurniItem>();
 
-        if (IsXmlFileAsync(data))
+        if (await IsXmlFileAsync(data))
         {
             // Looks like XML
             return ParseXml(data);
@@ -160,7 +165,7 @@ public class FurnidataClient
         return "";
     }
 
-    private static bool IsXmlFileAsync(string fileContents)
+    private static async Task<bool> IsXmlFileAsync(string fileContents)
     {
         try
         {
@@ -172,7 +177,7 @@ public class FurnidataClient
                 DtdProcessing = DtdProcessing.Ignore
             });
 
-            while (reader.Read()) { }
+            while (await reader.ReadAsync()) { }
             return true;
         }
         catch (Exception)
