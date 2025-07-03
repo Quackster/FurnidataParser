@@ -16,7 +16,7 @@ A lightweight .NET library for downloading and parsing Habbo furnidata.
 using FurnidataParser;
 
 var client = new FurnidataClient();
-var items = await client.FetchFurnidataAsync("https://www.habbo.com/gamedata/furnidata/...", cancellationToken);
+var items = await client.FetchFurnidataAsync("https://www.habbo.com/gamedata/furnidata/1", cancellationToken);
 
 foreach (var item in items)
 {
