@@ -1,18 +1,32 @@
 using System.Text.RegularExpressions;
 using System.Xml;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FurnidataParser;
 
+/// <summary>
+/// A client for downloading and parsing Habbo furnidata in either XML or chunked JSON format.
+/// </summary>
 public class FurnidataClient
 {
     private readonly HttpClient _httpClient;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FurnidataClient"/> class.
+    /// Allows injecting a custom <see cref="HttpClient"/> or uses a default one.
+    /// </summary>
+    /// <param name="httpClient">Optional custom HttpClient instance.</param>
     public FurnidataClient(HttpClient? httpClient = null)
     {
         _httpClient = httpClient ?? new HttpClient();
     }
 
+    /// <summary>
+    /// Fetches furnidata from the specified URL, and parses it into a list of <see cref="FurniItem"/> objects.
+    /// Automatically determines if the data is XML or chunked JSON.
+    /// </summary>
+    /// <param name="url">The URL to fetch furnidata from.</param>
+    /// <param name="cancellationToken">Optional cancellation token for the request.</param>
+    /// <returns>A list of parsed <see cref="FurniItem"/> instances.</returns>
     public async Task<List<FurniItem>> FetchFurnidataAsync(string url, CancellationToken cancellationToken = default)
     {
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
@@ -25,6 +39,13 @@ public class FurnidataClient
         return await ParseFurnidataAsync(data, cancellationToken);
     }
 
+    /// <summary>
+    /// Parses the furnidata from a string containing either XML or chunked JSON,
+    /// automatically detecting the format.
+    /// </summary>
+    /// <param name="data">The raw furnidata content.</param>
+    /// <param name="cancellationToken">Optional cancellation token for asynchronous XML parsing.</param>
+    /// <returns>A list of parsed <see cref="FurniItem"/> instances.</returns>
     private async Task<List<FurniItem>> ParseFurnidataAsync(string data, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(data))
@@ -32,35 +53,34 @@ public class FurnidataClient
 
         if (await IsXmlFileAsync(data))
         {
-            // Looks like XML
             return ParseXml(data);
         }
         else
         {
-            // Assume chunked pseudo-JSON
             return ParseChunkedJson(data);
         }
     }
 
+    /// <summary>
+    /// Parses chunked pseudo-JSON furnidata and returns a list of <see cref="FurniItem"/> objects.
+    /// </summary>
+    /// <param name="data">The chunked JSON-like data string.</param>
+    /// <returns>A list of parsed <see cref="FurniItem"/> instances.</returns>
     private List<FurniItem> ParseChunkedJson(string data)
     {
         var items = new List<FurniItem>();
-
-        // Find all chunks like [["..."],["..."]]
         var chunkMatches = Regex.Matches(data, @"\[\[.*?\]\]", RegexOptions.Singleline);
 
         foreach (Match chunkMatch in chunkMatches)
         {
             string chunk = chunkMatch.Value;
-
-            // Find each individual item like ["s","116",...]
             var itemMatches = Regex.Matches(chunk, @"\[(.*?)\]");
 
             foreach (Match itemMatch in itemMatches)
             {
                 var fields = SplitFields(itemMatch.Groups[1].Value);
 
-                if (fields.Count < 1) continue; // skip empty entries
+                if (fields.Count < 1) continue;
 
                 var item = new FurniItem
                 {
@@ -99,17 +119,21 @@ public class FurnidataClient
         return items;
     }
 
+    /// <summary>
+    /// Parses XML furnidata and returns a list of <see cref="FurniItem"/> objects.
+    /// </summary>
+    /// <param name="xml">The XML string to parse.</param>
+    /// <returns>A list of parsed <see cref="FurniItem"/> instances.</returns>
     private List<FurniItem> ParseXml(string xml)
     {
         var items = new List<FurniItem>();
-
-        var doc = new System.Xml.XmlDocument();
+        var doc = new XmlDocument();
         doc.LoadXml(xml);
 
         var furnitypes = doc.SelectNodes("//furnitype");
         if (furnitypes == null) return items;
 
-        foreach (System.Xml.XmlNode node in furnitypes)
+        foreach (XmlNode node in furnitypes)
         {
             var item = new FurniItem
             {
@@ -121,7 +145,7 @@ public class FurnidataClient
                 YDim = int.TryParse(node.SelectSingleNode("ydim")?.InnerText, out var ydim) ? ydim : 0,
                 PartColors = string.Join(",",
                     node.SelectNodes("partcolors/color")?
-                        .Cast<System.Xml.XmlNode>()
+                        .Cast<XmlNode>()
                         .Select(c => c.InnerText) ?? Array.Empty<string>()),
                 Name = node.SelectSingleNode("name")?.InnerText ?? "",
                 Description = node.SelectSingleNode("description")?.InnerText ?? "",
@@ -149,6 +173,11 @@ public class FurnidataClient
         return items;
     }
 
+    /// <summary>
+    /// Splits a JSON-like list of fields into individual string fields, handling escaped characters.
+    /// </summary>
+    /// <param name="item">A single item string inside square brackets, e.g. "field1","field2",...</param>
+    /// <returns>A list of unescaped field strings.</returns>
     private static List<string> SplitFields(string item)
     {
         var fields = new List<string>();
@@ -158,6 +187,13 @@ public class FurnidataClient
         return fields;
     }
 
+    /// <summary>
+    /// Retrieves a field at the specified index from a list of fields.
+    /// Returns an empty string if the index is out of bounds.
+    /// </summary>
+    /// <param name="fields">List of fields.</param>
+    /// <param name="index">Zero-based field index.</param>
+    /// <returns>The field value or empty string.</returns>
     private static string GetField(List<string> fields, int index)
     {
         if (index < fields.Count)
@@ -165,6 +201,11 @@ public class FurnidataClient
         return "";
     }
 
+    /// <summary>
+    /// Checks whether the given string content represents a valid XML document.
+    /// </summary>
+    /// <param name="fileContents">The file contents to check.</param>
+    /// <returns>True if the content is valid XML; otherwise false.</returns>
     private static async Task<bool> IsXmlFileAsync(string fileContents)
     {
         try
@@ -181,14 +222,22 @@ public class FurnidataClient
             while (await reader.ReadAsync()) { }
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return false;
         }
     }
 
-    private static bool IsTrue(string value)
+    /// <summary>
+    /// Determines if a string represents a boolean true value.
+    /// Accepts "1" or "true" (case-insensitive) as true.
+    /// </summary>
+    /// <param name="value">The string value to check.</param>
+    /// <returns>True if the string represents true; otherwise false.</returns>
+    private static bool IsTrue(string? value)
     {
+        if (value == null) return false;
+
         return value == "1" || value?.ToLower() == "true";
     }
 }
