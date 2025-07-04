@@ -137,6 +137,7 @@ public class FurnidataClient
         {
             var item = new FurniItem
             {
+                Type = (node.ParentNode?.Name?.ToLower() ?? "") == "roomitemtypes" ? "s" : "i",
                 Id = int.TryParse(node.Attributes?["id"]?.Value, out var id) ? id : 0,
                 ClassName = node.Attributes?["classname"]?.Value ?? "",
                 Revision = int.TryParse(node.SelectSingleNode("revision")?.InnerText, out var rev) ? rev : 0,
