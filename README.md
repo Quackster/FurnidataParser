@@ -2,6 +2,17 @@
 
 A lightweight .NET library for downloading and parsing Habbo furnidata.
 
+## Other Languages
+
+It’s also available in other languages for your preferred tech stack.
+
+### Available Ports
+
+- **Java:** [furnidataparser-java](https://github.com/Quackster/FurnidataParser/tree/master/java/org/oldskooler/furnidataparser)  
+
+  A full-featured Java implementation of FurnidataParser, using Java 11+.
+
+
 ## Features
 
 - Fetches Habbo furnidata from official or private URLs (private Habbo servers supported)  
@@ -86,6 +97,8 @@ Or via this command.
 ```sh
 NuGet\Install-Package FurnidataParser
 ```
+
+
 
 ## License
 
