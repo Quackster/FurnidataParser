@@ -71,3 +71,23 @@ foreach (var item in itemsFromFile)
 
 Console.WriteLine($"Parsed {itemsFromFile.Count} items from local furnidata file.");
 ```
+
+## Installation
+
+Install the package via NuGet.
+
+All NuGet versions can be found here: https://www.nuget.org/packages/FurnidataParser
+
+```sh
+dotnet add package FurnidataParser
+```
+
+Or via this command.
+
+```sh
+NuGet\Install-Package FurnidataParser
+```
+
+## License
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
