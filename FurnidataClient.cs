@@ -14,7 +14,10 @@ namespace FurnidataParser
     /// </summary>
     public class FurnidataClient
     {
+        public readonly string FURNIDATA_QUOTE = "\"&QUOTE&\"";
+
         private readonly HttpClient _httpClient;
+        private string FURNIDATA_QUOTE_REPLACE_TEMP;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FurnidataClient"/> class.
@@ -57,6 +60,16 @@ namespace FurnidataParser
             if (string.IsNullOrWhiteSpace(data))
                 return new List<FurniItem>();
 
+            // Start - handle weird quotes
+            FURNIDATA_QUOTE_REPLACE_TEMP = GetRandomReplacement();
+            data = data.Replace(FURNIDATA_QUOTE, FURNIDATA_QUOTE_REPLACE_TEMP);
+            // End - handle weird quotes
+
+            return await ParseItemsAsync(data);
+        }
+
+        private async Task<List<FurniItem>> ParseItemsAsync(string data)
+        {
             if (await IsXmlFileAsync(data))
             {
                 return ParseXml(data);
@@ -98,8 +111,8 @@ namespace FurnidataParser
                         XDim = int.TryParse(GetField(fields, 5), out var xdim) ? xdim : 0,
                         YDim = int.TryParse(GetField(fields, 6), out var ydim) ? ydim : 0,
                         PartColors = GetField(fields, 7),
-                        Name = GetField(fields, 8),
-                        Description = GetField(fields, 9),
+                        Name = RestoreQuotesInField(GetField(fields, 8)),
+                        Description = RestoreQuotesInField(GetField(fields, 9)),
                         AdUrl = GetField(fields, 10),
                         OfferId = int.TryParse(GetField(fields, 11), out var offerid) ? offerid : 0,
                         Buyout = IsTrue(GetField(fields, 12)),
@@ -146,16 +159,16 @@ namespace FurnidataParser
                     Type = (node.ParentNode?.Name?.ToLower() ?? "") == "roomitemtypes" ? "s" : "i",
                     Id = int.TryParse(node.Attributes?["id"]?.Value, out var id) ? id : 0,
                     ClassName = node.Attributes?["classname"]?.Value ?? "",
-                    Revision = int.TryParse(node.SelectSingleNode("revision")?.InnerText, out var rev) ? rev : 0,
-                    Category = node.SelectSingleNode("category")?.InnerText ?? "",
+                    Revision = int.TryParse(RestoreQuotesInField(node.SelectSingleNode("revision")?.InnerText), out var rev) ? rev : 0,
+                    Category = RestoreQuotesInField(node.SelectSingleNode("category")?.InnerText ?? ""),
                     XDim = int.TryParse(node.SelectSingleNode("xdim")?.InnerText, out var xdim) ? xdim : 0,
                     YDim = int.TryParse(node.SelectSingleNode("ydim")?.InnerText, out var ydim) ? ydim : 0,
                     PartColors = string.Join(",",
                         node.SelectNodes("partcolors/color")?
                             .Cast<XmlNode>()
                             .Select(c => c.InnerText) ?? Array.Empty<string>()),
-                    Name = node.SelectSingleNode("name")?.InnerText ?? "",
-                    Description = node.SelectSingleNode("description")?.InnerText ?? "",
+                    Name = RestoreQuotesInField(node.SelectSingleNode("name")?.InnerText) ?? "",
+                    Description = RestoreQuotesInField(node.SelectSingleNode("description")?.InnerText) ?? "",
                     AdUrl = node.SelectSingleNode("adurl")?.InnerText ?? "",
                     OfferId = int.TryParse(node.SelectSingleNode("offerid")?.InnerText, out var offerid) ? offerid : 0,
                     Buyout = IsTrue(node.SelectSingleNode("buyout")?.InnerText),
@@ -209,6 +222,23 @@ namespace FurnidataParser
         }
 
         /// <summary>
+        /// Restores quote characters in a furnidata field by replacing quote placeholders
+        /// (e.g., "&QUOTE&") with actual quote characters. This is used when handling chunked
+        /// JSON or XML data where quotes in text fields are represented with placeholders
+        /// to avoid parsing issues.
+        /// </summary>
+        /// <param name="field">
+        /// The input field string containing quote placeholders.
+        /// </param>
+        /// <returns>
+        /// The field string with all quote placeholders replaced by actual quote characters.
+        /// </returns>
+        private string RestoreQuotesInField(string field)
+        {
+            return field.Replace(FURNIDATA_QUOTE_REPLACE_TEMP, FURNIDATA_QUOTE);
+        }
+
+        /// <summary>
         /// Checks whether the given string content represents a valid XML document.
         /// </summary>
         /// <param name="fileContents">The file contents to check.</param>
@@ -247,6 +277,25 @@ namespace FurnidataParser
             if (value == null) return false;
 
             return value == "1" || value?.ToLower() == "true";
+        }
+
+        /// <summary>
+        /// Returns a random, hard-to-type Unicode character from a predefined list.
+        /// </summary>
+        private static string GetRandomReplacement()
+        {
+            Random _rng = new Random();
+
+            string[] _replacements = new[]
+            {
+                "\uE000",
+                //"\u2E2E",
+                //"\u2370",
+                //"\u1F678",
+                //"\uFFF9"
+            };
+
+            return _replacements[_rng.Next(_replacements.Length)];
         }
     }
 }
