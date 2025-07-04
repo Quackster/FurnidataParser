@@ -43,7 +43,7 @@ foreach (var item in itemsFromXml)
     Console.WriteLine(new string('-', 50));
 }
 
-Console.WriteLine($"Fetched {itemsFromXml.Count} items from chunked JSON endpoint.");
+Console.WriteLine($"Fetched {itemsFromXml.Count} items from XML endpoint."); 
 ```
 
 Fetch from Habbo’s chunked JSON endpoint.
@@ -61,7 +61,7 @@ foreach (var item in itemsFromJson)
     // ...
 }
 
-Console.WriteLine($"Fetched {itemsFromJson.Count} items from XML endpoint.");
+Console.WriteLine($"Fetched {itemsFromJson.Count} items chunked JSON endpoint.");
 ```
 
 Parse from raw data (e.g., local file) using ParseFurnidataAsync.

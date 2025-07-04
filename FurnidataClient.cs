@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace FurnidataParser
@@ -15,7 +21,7 @@ namespace FurnidataParser
         /// Allows injecting a custom <see cref="HttpClient"/> or uses a default one.
         /// </summary>
         /// <param name="httpClient">Optional custom HttpClient instance.</param>
-        public FurnidataClient(HttpClient? httpClient = null)
+        public FurnidataClient(HttpClient httpClient = null)
         {
             _httpClient = httpClient ?? new HttpClient();
         }
@@ -211,16 +217,17 @@ namespace FurnidataParser
         {
             try
             {
-                using var reader = XmlReader.Create(new StringReader(fileContents), new XmlReaderSettings
+                using (var reader = XmlReader.Create(new StringReader(fileContents), new XmlReaderSettings
                 {
                     ConformanceLevel = ConformanceLevel.Document,
                     IgnoreComments = true,
                     IgnoreWhitespace = true,
                     Async = true,
                     DtdProcessing = DtdProcessing.Ignore
-                });
-
-                while (await reader.ReadAsync()) { }
+                }))
+                {
+                    while (await reader.ReadAsync()) { }
+                }
                 return true;
             }
             catch (Exception)
@@ -235,7 +242,7 @@ namespace FurnidataParser
         /// </summary>
         /// <param name="value">The string value to check.</param>
         /// <returns>True if the string represents true; otherwise false.</returns>
-        private static bool IsTrue(string? value)
+        private static bool IsTrue(string value)
         {
             if (value == null) return false;
 

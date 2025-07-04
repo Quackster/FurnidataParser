@@ -1,15 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFramework>netstandard2.0</TargetFramework>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   
   <PropertyGroup>
     <Major>0</Major>
-    <Minor>1</Minor>
+    <Minor>3</Minor>
     <Build>0</Build>
     <Revision>$([System.DateTime]::UtcNow.ToString("MddHHmm"))</Revision>
 
@@ -19,9 +17,15 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
   
+  <ItemGroup>
+    <Compile Remove="java\**" />
+    <EmbeddedResource Remove="java\**" />
+    <None Remove="java\**" />
+  </ItemGroup>
+  
  
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\"/>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
