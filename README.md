@@ -61,7 +61,7 @@ foreach (var item in itemsFromJson)
     // ...
 }
 
-Console.WriteLine($"Fetched {itemsFromJson.Count} items chunked JSON endpoint.");
+Console.WriteLine($"Fetched {itemsFromJson.Count} items from chunked JSON endpoint.");
 ```
 
 Parse from raw data (e.g., local file) using ParseFurnidataAsync.
