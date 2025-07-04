@@ -1,6 +1,6 @@
 # FurnidataParser
 
-A lightweight .NET library for downloading and parsing Habbo furnidata.
+A lightweight .NET library for downloading and parsing Habbo furnidata. The library is written using .NET Standard 2.0 which means both .NET and .NET Framework are supported.
 
 ## Other Languages
 
