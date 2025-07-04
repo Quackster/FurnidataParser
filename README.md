@@ -13,29 +13,6 @@ A lightweight .NET library for downloading and parsing Habbo furnidata.
 
 ## Usage
 
-Fetch from Habbo’s chunked JSON endpoint.
-
-```csharp
-using FurnidataParser;
-
-var client = new FurnidataClient();
-
-var itemsFromJson = await client.FetchFurnidataAsync(
-    "https://www.habbo.com/gamedata/furnidata/1");
-
-foreach (var item in itemsFromJson)
-{
-    Console.WriteLine($"ID {item.Id}: {item.Name} [{item.ClassName}]");
-    Console.WriteLine($"  Type: {item.Type} | Category: {item.Category} | Revision: {item.Revision}");
-    Console.WriteLine($"  Dimensions: {item.XDim}x{item.YDim} | Colors: {item.PartColors}");
-    Console.WriteLine($"  Description: {item.Description}");
-    Console.WriteLine($"  Offer ID: {item.OfferId} | Buyout: {item.Buyout} | Rare: {item.Rare}");
-    Console.WriteLine(new string('-', 50));
-}
-
-Console.WriteLine($"Fetched {itemsFromJson.Count} items from chunked JSON endpoint.");
-```
-
 Fetch from Habbo’s XML endpoint.
 
 ```csharp
@@ -48,10 +25,32 @@ var itemsFromXml = await client.FetchFurnidataAsync(
 
 foreach (var item in itemsFromXml)
 {
+    Console.WriteLine($"ID {item.Id}: {item.Name} [{item.ClassName}]");
+    Console.WriteLine($"  Type: {item.Type} | Category: {item.Category} | Revision: {item.Revision}");
+    Console.WriteLine($"  Dimensions: {item.XDim}x{item.YDim} | Colors: {item.PartColors}");
+    Console.WriteLine($"  Description: {item.Description}");
+    Console.WriteLine(new string('-', 50));
+}
+
+Console.WriteLine($"Fetched {itemsFromXml.Count} items from chunked JSON endpoint.");
+```
+
+Fetch from Habbo’s chunked JSON endpoint.
+
+```csharp
+using FurnidataParser;
+
+var client = new FurnidataClient();
+
+var itemsFromJson = await client.FetchFurnidataAsync(
+    "https://www.habbo.com/gamedata/furnidata/1");
+
+foreach (var item in itemsFromJson)
+{
     // ...
 }
 
-Console.WriteLine($"Fetched {itemsFromXml.Count} items from XML endpoint.");
+Console.WriteLine($"Fetched {itemsFromJson.Count} items from XML endpoint.");
 ```
 
 Parse from raw data (e.g., local file) using ParseFurnidataAsync.
