@@ -22,6 +22,22 @@ namespace FurnidataParser
         public string ClassName { get; set; }
 
         /// <summary>
+        /// The file name of the furni.
+        /// </summary>
+        public string FileName
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(ClassName) && ClassName.Contains("*"))
+                {
+                    return ClassName.Split('*')[0];
+                }
+
+                return ClassName;
+            }
+        }
+
+        /// <summary>
         /// The revision number of the furni asset.
         /// </summary>
         public int Revision { get; set; }
