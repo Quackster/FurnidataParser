@@ -24,18 +24,12 @@ namespace FurnidataParser
         /// <summary>
         /// The file name of the furni.
         /// </summary>
-        public string FileName
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(ClassName) && ClassName.Contains("*"))
-                {
-                    return ClassName.Split('*')[0];
-                }
+        public string FileName { get; set; }
 
-                return ClassName;
-            }
-        }
+        /// <summary>
+        /// The alias of the furni (ads with branding or not, or multiple colours etc).
+        /// </summary>
+        public string Alias { get; set; }
 
         /// <summary>
         /// The revision number of the furni asset.

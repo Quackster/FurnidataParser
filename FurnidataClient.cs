@@ -80,6 +80,107 @@ namespace FurnidataParser
             }
         }
 
+        private void AddAliasItems(List<FurniItem> items)
+        {
+            var aliases = new[]
+            {
+                new { Name = "footylamp", Alias = "footylamp_campaign_ing" },
+                new { Name = "easy_bowl2", Alias = "easy_bowl" },
+                new { Name = "ads_cllava2", Alias = "ads_cllava" },
+                new { Name = "rare_icecream_campaign", Alias = "rare_icecream_campaign2" },
+                new { Name = "calippo", Alias = "calippo_cmp" },
+                new { Name = "igor_seat", Alias = "igor_seatcmp" },
+                new { Name = "ads_711", Alias = "ads_711c" },
+                new { Name = "ads_cltele", Alias = "ads_cltele_cmp" },
+                new { Name = "ads_ob_pillow", Alias = "ads_ob_pillowcmp" },
+                new { Name = "ads_711shelf", Alias = "ads_711shelfcmp" },
+                new { Name = "ads_frankb", Alias = "ads_frankbcmp" },
+                new { Name = "ads_grefusa_cactus", Alias = "ads_grefusa_cactus_camp" },
+                new { Name = "ads_cl_jukeb", Alias = "ads_cl_jukeb_camp" },
+                new { Name = "ads_reebok_block2", Alias = "ads_reebok_block2cmp" },
+                new { Name = "ads_cl_sofa", Alias = "ads_cl_sofa_cmp" },
+                new { Name = "ads_calip_cola", Alias = "ads_calip_colac" },
+                new { Name = "ads_calip_chair", Alias = "ads_calip_chaircmp" },
+                new { Name = "ads_calip_pool", Alias = "ads_calip_pool_cmp" },
+                new { Name = "ads_calip_tele", Alias = "ads_calip_telecmp" },
+                new { Name = "ads_calip_parasol", Alias = "ads_calip_parasol_cmp" },
+                new { Name = "ads_calip_lava", Alias = "ads_calip_lava2" },
+                new { Name = "ads_calip_fan", Alias = "ads_calip_fan_cmp" },
+                new { Name = "ads_oc_soda", Alias = "ads_oc_soda_cmp" },
+                new { Name = "ads_1800tele", Alias = "ads_1800tele_cmp" },
+                new { Name = "ads_spang_sleep", Alias = "ads_spang_sleep_cmp" },
+                new { Name = "ads_cl_moodi", Alias = "ads_cl_moodi_camp" },
+                new { Name = "ads_droetker_paula", Alias = "ads_droetker_paula_cmp" },
+                new { Name = "ads_chups", Alias = "ads_chups_camp" },
+                new { Name = "garden_seed", Alias = "garden_seed_cmp" },
+                new { Name = "ads_grefusa_yum", Alias = "ads_grefusa_yum_camp" },
+                new { Name = "ads_cheetos", Alias = "ads_cheetos_camp" },
+                new { Name = "ads_chocapic", Alias = "ads_chocapic_camp" },
+                new { Name = "ads_capri_chair", Alias = "ads_capri_chair_camp" },
+                new { Name = "ads_capri_lava", Alias = "ads_capri_lava_camp" },
+                new { Name = "ads_capri_arcade", Alias = "ads_capri_arcade_camp" },
+                new { Name = "ads_pepsi0", Alias = "ads_pepsi0_camp" },
+                new { Name = "ads_cheetos_hotdog", Alias = "ads_cheetos_hotdog_camp" },
+                new { Name = "ads_cheetos_bath", Alias = "ads_cheetos_bath_camp" },
+                new { Name = "ads_oc_soda_cherry", Alias = "ads_oc_soda_cherry_cmp" },
+                new { Name = "ads_disney_tv", Alias = "ads_disney_tvcmp" },
+                new { Name = "ads_hh_safe", Alias = "ads_hh_safecmp" },
+                new { Name = "ads_sunnyvend", Alias = "ads_sunnyvend_camp" },
+                new { Name = "ads_rangocactus", Alias = "ads_rangocactus_camp" },
+                new { Name = "ads_wowpball", Alias = "ads_wowpball_camp" },
+                new { Name = "ads_suun", Alias = "ads_suun_camp" },
+                new { Name = "ads_liisu", Alias = "ads_liisu_camp" },
+                new { Name = "ads_honeymonster", Alias = "ads_honeymonster_cmp" },
+                new { Name = "ads_ag_crate", Alias = "ads_ag_crate_camp" },
+                new { Name = "ads_dfrisss", Alias = "ads_dfrisss_camp" },
+            };
+
+            foreach (var mapping in aliases)
+            {
+                // Find the original item with a matching FileName
+                if (items.FirstOrDefault(x => x.FileName == mapping.Name) is FurniItem originalItem)
+                {
+                    // Set the alias of the original item
+                    originalItem.Alias = mapping.Alias;
+
+                    // Duplicate the item
+                    var aliasItem = new FurniItem
+                    {
+                        Type = originalItem.Type,
+                        Id = originalItem.Id,
+                        ClassName = mapping.Alias,
+                        FileName = mapping.Alias,
+                        Alias = mapping.Name,
+                        Revision = originalItem.Revision,
+                        Category = originalItem.Category,
+                        XDim = originalItem.XDim,
+                        YDim = originalItem.YDim,
+                        PartColors = originalItem.PartColors,
+                        Name = originalItem.Name,
+                        Description = originalItem.Description,
+                        AdUrl = originalItem.AdUrl,
+                        OfferId = originalItem.OfferId,
+                        Buyout = originalItem.Buyout,
+                        RentOfferId = originalItem.RentOfferId,
+                        RentBuyout = originalItem.RentBuyout,
+                        BC = originalItem.BC,
+                        ExcludedDynamic = originalItem.ExcludedDynamic,
+                        BCOfferId = originalItem.BCOfferId,
+                        CustomParams = originalItem.CustomParams,
+                        SpecialType = originalItem.SpecialType,
+                        CanStandOn = originalItem.CanStandOn,
+                        CanSitOn = originalItem.CanSitOn,
+                        CanLayOn = originalItem.CanLayOn,
+                        FurniLine = originalItem.FurniLine,
+                        Environment = originalItem.Environment,
+                        Rare = originalItem.Rare
+                    };
+
+                    items.Add(aliasItem);
+                }
+            }
+        }
+
         /// <summary>
         /// Parses chunked pseudo-JSON furnidata and returns a list of <see cref="FurniItem"/> objects.
         /// </summary>
@@ -131,9 +232,17 @@ namespace FurnidataParser
                         Rare = IsTrue(GetField(fields, 25))
                     };
 
+                    if (item.ClassName.Contains("*")) 
+                        item.FileName = item.ClassName.Split('*')[0];
+                    else
+                        item.FileName = item.ClassName;
+
+                    item.Alias = item.FileName;
                     items.Add(item);
                 }
             }
+
+            AddAliasItems(items);
 
             return items;
         }
@@ -187,8 +296,16 @@ namespace FurnidataParser
                     Rare = IsTrue(node.SelectSingleNode("rare")?.InnerText)
                 };
 
+                if (item.ClassName.Contains("*"))
+                    item.FileName = item.ClassName.Split('*')[0];
+                else
+                    item.FileName = item.ClassName;
+
+                item.Alias = item.FileName;
                 items.Add(item);
             }
+
+            AddAliasItems(items);
 
             return items;
         }
