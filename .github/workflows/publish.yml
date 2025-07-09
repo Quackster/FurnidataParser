@@ -32,7 +32,8 @@ jobs:
 
     # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
-      uses: actions/setup-dotnet@v8
+      uses: actions/setup-dotnet@v4
+      dotnet-version: '8.0.x'
 
     # Create the NuGet package in the folder from the environment variable NuGetDirectory
     - run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }}
@@ -50,7 +51,8 @@ jobs:
     needs: [ create_nuget ]
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v8
+        uses: actions/setup-dotnet@v4
+        dotnet-version: '8.0.x'
 
       # Download the NuGet package created in the previous job
       - uses: actions/download-artifact@v3
@@ -73,7 +75,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
-      uses: actions/setup-dotnet@v9
+      uses: actions/setup-dotnet@v4
+      dotnet-version: '8.0.x'
     - name: Run tests
       run: dotnet test --configuration Release
 
@@ -93,7 +96,8 @@ jobs:
 
       # Install the .NET SDK indicated in the global.json file
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v8
+        uses: actions/setup-dotnet@v4
+        dotnet-version: '8.0.x'
 
       # Publish all NuGet packages to NuGet.org
       # Use --skip-duplicate to prevent errors if a package with the same version already exists.
