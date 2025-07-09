@@ -133,6 +133,7 @@ namespace FurnidataParser
                 new { Name = "ads_honeymonster", Alias = "ads_honeymonster_cmp" },
                 new { Name = "ads_ag_crate", Alias = "ads_ag_crate_camp" },
                 new { Name = "ads_dfrisss", Alias = "ads_dfrisss_camp" },
+                new { Name = "ads_lin_wh_c", Alias = "ads_lin_wh_c2" },
             };
 
             foreach (var mapping in aliases)
